@@ -1,0 +1,17 @@
+{
+    "name": "kenphp/ken-twig",
+    "description": "Twig Template Engine for KenPHP Framework",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Muhammad Safri Juliardi",
+            "email": "ardi93@gmail.com"
+        }
+    ],
+    "minimum-stability":"dev",
+    "require": {
+        "kenphp/ken":"*",
+        "twig/twig": "^1.25"
+    }
+}
