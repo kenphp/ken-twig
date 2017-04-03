@@ -13,5 +13,10 @@
     "require": {
         "kenphp/ken":"*",
         "twig/twig": "^1.25"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ken\\View\\TwigEngine\\": "src/"
+        }
     }
 }
