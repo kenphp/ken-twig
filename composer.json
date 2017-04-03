@@ -1,6 +1,6 @@
 {
     "name": "kenphp/ken-twig",
-    "description": "Twig Template Engine for KenPHP Framework",
+    "description": "Twig Templating Engine for KenPHP Framework",
     "type": "library",
     "license": "MIT",
     "authors": [
