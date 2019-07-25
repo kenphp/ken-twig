@@ -33,17 +33,15 @@ class TwigEngine extends BaseEngine
             $this->engine = new \Twig\Environment($loader);
         }
 
-        $this->registerCustomFunctions();
+        $this->registerViewFunctions();
     }
 
     /**
      * Registers custom functions.
      */
-    protected function registerCustomFunctions()
+    protected function registerViewFunctions()
     {
-        $functionList = $this->functionGenerator->getFunctionList();
-
-        foreach ($functionList as $function) {
+        foreach ($this->viewFunctions as $function) {
             if (isset($function['name']) && isset($function['callable'])) {
                 if (!is_numeric($function['name']) && is_callable($function['callable'])) {
                     $twigFunction = new Twig\TwigFunction($function['name'], $function['callable']);
