@@ -2,10 +2,11 @@
 
 namespace Ken\View\TwigEngine;
 
-use Twig_Environment;
-use Twig_Loader_Filesystem;
-use Twig_SimpleFunction;
+use Twig;
+
 use Ken\View\BaseEngine;
+
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * @author Juliardi <ardi93@gmail.com>
@@ -13,46 +14,23 @@ use Ken\View\BaseEngine;
 class TwigEngine extends BaseEngine
 {
     /**
-     * @var Twig_Environment
+     * @var \Twig\Environment
      */
     protected $engine;
-
-    /**
-     * @var \Ken\TwigEngine\FunctionGenerator
-     */
-    protected $functionGenerator;
-
-    public function __construct($config)
-    {
-        parent::__construct($config);
-        if (!isset($config['functionGenerator'])) {
-            $config['functionGenerator'] = __NAMESPACE__.'\FunctionGenerator';
-        }
-        $this->initFunctionGenerator($config['functionGenerator']);
-        $this->initEngine();
-    }
-
-    /**
-     * Inits custom function generator.
-     */
-    protected function initFunctionGenerator($generatorClass)
-    {
-        $this->functionGenerator = $generatorClass::build();
-    }
 
     /**
      * {@inheritdoc}
      */
     protected function initEngine()
     {
-        $loader = new Twig_Loader_Filesystem($this->viewPath);
+        $loader = new \Twig\Loader\FilesystemLoader($this->viewPath);
 
         if (!empty($this->cachePath)) {
-            $this->engine = new Twig_Environment($loader, array(
-                'cache' => $this->cachePath,
-            ));
+            $this->engine = new \Twig\Environment($loader, [
+                'cache' => $this->cach,
+            ]);
         } else {
-            $this->engine = new Twig_Environment($loader);
+            $this->engine = new \Twig\Environment($loader);
         }
 
         $this->registerCustomFunctions();
@@ -67,27 +45,34 @@ class TwigEngine extends BaseEngine
 
         foreach ($functionList as $function) {
             if (isset($function['name']) && isset($function['callable'])) {
-                $twigFunction = new Twig_SimpleFunction($function['name'], $function['callable']);
-                $this->engine->addFunction($twigFunction);
+                if (!is_numeric($function['name']) && is_callable($function['callable'])) {
+                    $twigFunction = new Twig\TwigFunction($function['name'], $function['callable']);
+                    $this->engine->addFunction($twigFunction);
+                }
             }
         }
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function render($view, array $params = [])
-    {
-        $view = $this->suffixExtension($view);
-
-        echo $this->engine->render($view, $params);
+    * @inheritDoc
+    */
+    protected function getFileExtension() {
+        return 'twig';
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    protected function getFileExtension()
-    {
-        return 'twig';
+    public function render(ResponseInterface $response, $view, array $params = []) {
+        $template = $this->fetch($view, $params);
+        $response->getBody()->write($template);
+
+        return $response;
+    }
+    /**
+     * @inheritDoc
+     */
+    public function fetch($view, array $params = []) {
+        return $this->engine->render($view, $params);
     }
 }
